@@ -1,5 +1,9 @@
 package ru.gb.lesson4;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 public class Homework {
 
   /**
@@ -12,29 +16,29 @@ public class Homework {
    */
 
   public static void main(String[] args) {
-    Box<Apple> appleBox = new Box();
+    Box<Apple> appleBox = new Box<>();
     System.out.println(appleBox.getWeight()); // 0
 
     appleBox.add(new Apple(2)); // Должно компилироваться
     appleBox.add(new Apple(4)); // Должно компилироваться
     System.out.println(appleBox.getWeight()); // 6
-    appleBox.add(new Orange(4)); // Не должно компилироваться!!!
+//    appleBox.add(new Orange(4)); // Не должно компилироваться!!!
     appleBox.add(new GoldenApple(4)); // Должно компилироваться
     System.out.println(appleBox.getWeight()); // 10
 
-    Box<Orange> orangeBox = new Box();
-    orangeBox.add(new Apple(2)); // Не должно компилироваться!!!
+    Box<Orange> orangeBox = new Box<>();
+//    orangeBox.add(new Apple(2)); // Не должно компилироваться!!!
     orangeBox.add(new Orange(8)); // Должно компилироваться
     System.out.println(orangeBox.getWeight()); // 8
 
-    orangeBox.move(appleBox); // Не должно компилироваться!!!
-    appleBox.move(orangeBox); // Не должно компилироваться!!!
+//    orangeBox.move(appleBox); // Не должно компилироваться!!!
+//    appleBox.move(orangeBox); // Не должно компилироваться!!!
 
-    Box<GoldenApple> goldenAppleBox = new Box();
+    Box<GoldenApple> goldenAppleBox = new Box<>();
     goldenAppleBox.add(new GoldenApple(20)); // Должно компилироваться
-    goldenAppleBox.add(new Apple(20)); // Не должно компилироваться!!!
+//    goldenAppleBox.add(new Apple(20)); // Не должно компилироваться!!!
 
-    appleBox.move(goldenAppleBox); // Не должно компилироваться!!!
+//    appleBox.move(goldenAppleBox); // Не должно компилироваться!!!
     goldenAppleBox.move(appleBox); // Должно компилироваться
 
     System.out.println(goldenAppleBox.getWeight()); // 0
@@ -54,23 +58,48 @@ public class Homework {
 
   }
 
-  static class Box {
+  static class Box<T extends Fruit> implements Iterable<T> {
 
-    public void add(Fruit fruit) { // FIXME Должен быть дженерик!
-      // FIXME Реализовать добавления фрукта
-      throw new UnsupportedOperationException();
+    private final List<T> storage = new ArrayList<>();
+
+    public void add(T fruit) {
+      storage.add(fruit);
     }
 
     public int getWeight() {
-      // FIXME Реализовать подсчет суммарного веса
-      throw new UnsupportedOperationException();
+      return storage.stream()
+        .mapToInt(Fruit::getWeight)
+        .sum();
+
+//      int sum = 0;
+//      for (T fruit : storage) {
+//        sum += fruit.getWeight();
+//      }
+//      return sum;
     }
 
-    public void move(Box another) { // FIXME Должен быть дженерик!
-      // FIXME Реализовать пересыпание
-      throw new UnsupportedOperationException();
+    // PECS Producer - Extends, Consumer - Super
+    public void move(Box<? super T> another) { // FIXME Должен быть дженерик!
+      storage.forEach(another::add);
+      storage.clear();
+
+//      Iterator<T> iterator = storage.iterator();
+//      while (iterator.hasNext()) {
+//        T fruit = iterator.next();
+//        another.add(fruit);
+//        iterator.remove();
+//      }
+
+//      for (T fruit : storage) {
+//        another.add(fruit);
+//      }
+//      storage.clear();
     }
 
+    @Override
+    public Iterator<T> iterator() {
+      return storage.iterator();
+    }
   }
 
   static class Fruit {
