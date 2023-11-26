@@ -13,7 +13,7 @@ public class Account {
   }
 
   public void take(double amount) {
-    this.amount += amount;
+    this.amount -= amount;
   }
 
   public double getAmount() {
